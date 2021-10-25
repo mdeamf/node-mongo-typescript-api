@@ -13,6 +13,12 @@ const pedidosSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  itens: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Itens',
+    },
+  ],
 });
 
 const Pedidos = mongoose.model('Pedidos', pedidosSchema);
