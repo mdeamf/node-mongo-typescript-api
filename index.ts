@@ -12,15 +12,6 @@ const mdb = process.env.MONGODB_CNCTSTR || '';
 app.use(express.json(), cors(), router);
 
 app.get('/', (req: Request, res: Response) => {
-  interface ObjetoDeNumeros {
-    numero: number;
-    outroNumero?: number;
-  }
-  
-  interface ListaDeNumeros extends Array<ObjetoDeNumeros> {}
-
-  const lista: ListaDeNumeros = req.body; // Parse
-
   res.status(200).json({
     message: 'API está funcionando.',
   });
