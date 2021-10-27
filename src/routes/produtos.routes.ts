@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
-import Produtos, { Produto } from '../models/produtos.models';
+import { IProduto } from '../interfaces/produtos.interfaces';
+import Produtos from '../models/produtos.models';
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
 });
 
 router.post('/', async (req: Request, res: Response) => {
-  const produtoNovo: Produto = {
+  const produtoNovo: IProduto = {
     descricao: req.body.descricao,
     valor_unit: req.body.valor_unit,
   };

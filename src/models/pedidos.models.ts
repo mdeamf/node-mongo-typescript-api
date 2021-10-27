@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { IPedidoModel } from '../interfaces/pedidos.interfaces';
 
 const pedidosSchema = new mongoose.Schema({
   descricao: {
@@ -21,6 +22,11 @@ const pedidosSchema = new mongoose.Schema({
   ],
 });
 
-const Pedidos = mongoose.model('Pedidos', pedidosSchema);
+pedidosSchema.pre('save', function (next) {
+  console.log('Estamos salvando o seu pedido...');
+  next();
+})
+
+const Pedidos = mongoose.model<IPedidoModel>('Pedidos', pedidosSchema);
 
 export default Pedidos;

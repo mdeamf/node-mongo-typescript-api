@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { IItens } from '../interfaces/itens.interfaces';
 
 const itensSchema = new mongoose.Schema({
   produto: {
@@ -16,6 +17,6 @@ const itensSchema = new mongoose.Schema({
   },
 });
 
-const Itens = mongoose.model('Itens', itensSchema);
+const Itens = mongoose.model<IItens>('Itens', itensSchema);
 
 export default Itens;

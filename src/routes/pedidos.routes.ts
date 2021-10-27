@@ -1,8 +1,22 @@
 import express, { Request, Response } from 'express';
+import { IPedidoModel, IPedidoBody } from '../interfaces/pedidos.interfaces';
 import Itens from '../models/itens.models';
 import Pedidos from '../models/pedidos.models';
 
 const router = express.Router();
+
+router.get('/:id', async (req: Request, res: Response) => {
+  // const pedido = await Pedidos.findOne({ _id: req.params.id });
+  const pedido = await Pedidos.findById(req.params.id);
+  return res.status(200).json(pedido);
+});
+
+router.put('/:id', async (req: Request, res: Response) => {
+  const pedido = await Pedidos.findByIdAndUpdate(req.params.id, {
+    data: req.body.data,
+  });
+  return res.status(200).json(pedido);
+});
 
 router.get('/', async (req: Request, res: Response) => {
   // const pedidos = await Pedidos.find();
@@ -35,23 +49,22 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 router.post('/', async (req: Request, res: Response) => {
-  const { descricao, data, valor_total, itens } = req.body;
+  const pedidoBody: IPedidoBody = req.body;
 
-  const itensAdicionados = [];
-  for (let item of itens) {
-    const itemAdicionado = await Itens.create({
-      produto: item.produto,
-      quantidade: item.quantidade,
-    });
-    itensAdicionados.push(itemAdicionado._id);
+  const pedidoInserir: IPedidoModel = {
+    descricao: pedidoBody.descricao,
+    data: pedidoBody.data,
+    valor_total: pedidoBody.valor_total,
+    itens: [],
+  };
+
+  for (let item of pedidoBody.itens) {
+    const itemAdicionado = await Itens.create(item);
+    await itemAdicionado.save();
+    pedidoInserir.itens.push(itemAdicionado._id);
   }
 
-  const pedido = await Pedidos.create({
-    descricao,
-    data,
-    valor_total,
-    itens: itensAdicionados,
-  });
+  const pedido = await Pedidos.create(pedidoInserir);
   await pedido.save();
 
   return res.status(201).json(pedido);

@@ -1,9 +1,5 @@
 import mongoose from 'mongoose';
-
-export interface Produto {
-  descricao: string;
-  valor_unit: number;
-}
+import { IProduto } from '../interfaces/produtos.interfaces';
 
 const produtosSchema = new mongoose.Schema({
   descricao: {
@@ -16,6 +12,6 @@ const produtosSchema = new mongoose.Schema({
   },
 });
 
-const Produtos = mongoose.model<Produto>('Produtos', produtosSchema);
+const Produtos = mongoose.model<IProduto>('Produtos', produtosSchema);
 
 export default Produtos;
