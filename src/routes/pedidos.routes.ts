@@ -1,7 +1,9 @@
+import mongoose from 'mongoose';
 import express, { Request, Response } from 'express';
 import { IPedidoModel, IPedidoBody } from '../interfaces/pedidos.interfaces';
 import Itens from '../models/itens.models';
 import Pedidos from '../models/pedidos.models';
+import Produtos from '../models/produtos.models';
 
 const router = express.Router();
 
@@ -49,25 +51,45 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 router.post('/', async (req: Request, res: Response) => {
-  const pedidoBody: IPedidoBody = req.body;
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  const pedidoInserir: IPedidoModel = {
-    descricao: pedidoBody.descricao,
-    data: pedidoBody.data,
-    valor_total: pedidoBody.valor_total,
-    itens: [],
-  };
+  try {
+    const pedidoBody: IPedidoBody = req.body;
 
-  for (let item of pedidoBody.itens) {
-    const itemAdicionado = await Itens.create(item);
-    await itemAdicionado.save();
-    pedidoInserir.itens.push(itemAdicionado._id);
+    const pedidoInserir: IPedidoModel = {
+      descricao: pedidoBody.descricao,
+      data: pedidoBody.data,
+      valor_total: pedidoBody.valor_total,
+      itens: [],
+    };
+
+    for (let item of pedidoBody.itens) {
+      const produtoExiste = await Produtos.findById(item.produto);
+      console.log('>>>>>>', item.produto, produtoExiste);
+      if (!produtoExiste) throw new Error(`Produto ${item.produto} não encontrado!`);
+    }
+
+    const itens = await Itens.create(pedidoBody.itens, { session: session });
+    console.log(itens);
+
+    pedidoInserir.itens = itens.map((item) => item._id);
+
+    const pedido = await Pedidos.create([pedidoInserir], { session: session });
+    console.log(pedido);
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(201).json(pedido);
+  } catch (err: any) {
+    await session.abortTransaction();
+    session.endSession();
+
+    return res.status(500).json({
+      error: err.toString(),
+    });
   }
-
-  const pedido = await Pedidos.create(pedidoInserir);
-  await pedido.save();
-
-  return res.status(201).json(pedido);
 });
 
 export default router;
